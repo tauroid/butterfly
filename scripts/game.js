@@ -84,6 +84,7 @@ define(['assets','messagebus','movements'],
 
     Game.prototype.update = function () {
         if (!this.focussed) {
+            this.lastUpdateTime = (new Date()).getTime() - this.starttime;
             setTimeout(this.update.bind(this), this.updateTimestep);
             return;
         }
@@ -91,6 +92,8 @@ define(['assets','messagebus','movements'],
         var newtime = (new Date()).getTime() - this.startTime;
         var delta = newtime - this.lastUpdateTime;
         this.lastUpdateTime = newtime;
+
+        if (Math.abs(delta) > 50) delta = 50;
 
         for (var i = 0; i < this.groupnames.length; ++i) {
             var logicgroup = this.logicgroups[this.groupnames[i]];

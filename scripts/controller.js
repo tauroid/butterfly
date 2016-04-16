@@ -39,22 +39,61 @@ define(function () {
     };
 
     Controller.prototype.processClick = function (mouseevent) {
-        this.messagebus.sendMessage("control", {
-            action: "activate",
-            x: mouseevent.pageX,
-            y: mouseevent.pageY
-        });
+        this.messagebus.sendMessage("mouseclick",
+                new PIXI.Point(mouseevent.clientX, mouseevent.clientY));
     };
 
-    Controller.prototype.processMousemove = function (message) {
+    Controller.prototype.processMousemove = function (mouseevent) {
+        this.messagebus.sendMessage("mouseposition", new PIXI.Point(mouseevent.clientX, mouseevent.clientY));
     };
 
-    Controller.prototype.processKeydown = function (message) {
-        this.messagebus.sendMessage("key", message);
+    Controller.prototype.processKeydown = function (keyevent) {
+        var cmd = this.mapKey(keyevent.key);
+
+        if (["up", "down", "left", "right", "shift"].indexOf(cmd) != -1) {
+            this.messagebus.sendMessage("control", { control: cmd, active: true });
+        }
     };
 
-    Controller.prototype.processKeyup = function (message) {
+    Controller.prototype.processKeyup = function (keyevent) {
+        var cmd = this.mapKey(keyevent.key);
+
+        if (["up", "down", "left", "right", "shift"].indexOf(cmd) != -1) {
+            this.messagebus.sendMessage("control", { control: cmd, active: false });
+        }
     };
+
+    Controller.prototype.mapKey = function (key) {
+        var cmd = null;
+
+        switch (key) {
+            case "ArrowUp":
+            case "w":
+            case "W":
+                cmd = "up";
+                break;
+            case "ArrowDown":
+            case "s":
+            case "S":
+                cmd = "down";
+                break;
+            case "ArrowLeft":
+            case "a":
+            case "A":
+                cmd = "left";
+                break;
+            case "ArrowRight":
+            case "d":
+            case "D":
+                cmd = "right";
+                break;
+            case "Shift":
+                cmd = "shift";
+                break;
+        }
+
+        return cmd;
+    }
 
     return Controller;
 });
