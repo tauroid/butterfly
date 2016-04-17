@@ -22,7 +22,7 @@ define(['common/pixi.min'], function (PIXI) {
         this.opinion = [];
         this.num_opinions = 0;
 
-        this.default_opinion = 0.01;
+        this.default_opinion = 0;
 
         this.targetvec = new PIXI.Point();
         this.movevec = new PIXI.Point();
@@ -31,13 +31,21 @@ define(['common/pixi.min'], function (PIXI) {
 
         this.personalspace = 30;
 
-        this.disengaged = false;
+        this.idle = false;
+
+        this.goal = null;
+        this.goalcallback = null;
 
         this.toilets = toilets;
         this.toiletbreak = null;
 
         this.toilettime = 30000;
-        this.toiletinterval = 180000;
+        this.toiletinterval = 500000;
+
+        this.noavoid = false;
+        this.noseek = false;
+
+        this.returnpoint = null;
     };
 
     Dancer.prototype.setID = function (ID) {
@@ -63,6 +71,8 @@ define(['common/pixi.min'], function (PIXI) {
     Dancer.prototype.update = function (delta, time) {
         if (this.ID == undefined) return;
 
+        if (this.idle) return;
+
         var x = this.graphics.x; var y = this.graphics.y;
 
         this.targetvec.x = 0;
@@ -71,19 +81,13 @@ define(['common/pixi.min'], function (PIXI) {
         this.movevec.x = 0;
         this.movevec.y = 0;
 
-        if (!this.disengaged && time > this.toiletbreak) {
-            this.disengage();
-            this.toiletbreak = time + this.toilettime;
-        }
+        if (!this.goal && this.toiletbreak != null && time > this.toiletbreak) {
+            this.returnpoint = this.graphics.position.clone();
 
-        if (this.disengaged) {
-            if (time > this.toiletbreak) {
-                this.engage();
-                this.toiletbreak = null;
-            }
-            
-            var toilet_dist_x, toilet_dist_y, toilet_dist;
-            toilet_dist_x = toilet_dist_y = toilet_dist = null;
+            if (this.toilets.length == 0) return;
+
+            var toilet_dist = null;
+            var ti = null;
 
             for (var i = 0; i < this.toilets.length; ++i) {
                 var tdx = this.toilets[i].x - x;
@@ -92,22 +96,68 @@ define(['common/pixi.min'], function (PIXI) {
                 var td = Math.sqrt(Math.pow(tdx, 2) + Math.pow(tdy, 2));
 
                 if (toilet_dist == null || td < toilet_dist) {
-                    toilet_dist_x = tdx; toilet_dist_y = tdy;
                     toilet_dist = td;
+                    ti = i;
                 }
             }
 
-            this.movevec.x = toilet_dist_x / toilet_dist;
-            this.movevec.y = toilet_dist.y / toilet_dist;
+            this.noseek = true;
+            this.setGoal(this.toilets[ti], () => {
+                this.noavoid = true;
+                this.idle = true;
+                setTimeout(() => {
+                    this.idle = false;
+                    this.noavoid = false;
+                    this.setGoal(this.returnpoint, () => {
+                        this.noseek = false;
+                        this.toiletbreak = null;
+                    });
+                }, this.toilettime);
+            });
 
-            this.move(delta);
-
-            return;
         }
 
         if (this.toiletbreak == null) {
             this.toiletbreak = time + this.toiletinterval * Math.random();
         }
+
+        if (this.goal) {
+            this.seekGoal(delta);
+        } else {
+            this.seekGroup(delta);
+        }
+
+        this.bounds.applyHardBounds(this.graphics);
+    };
+
+    Dancer.prototype.setGoal = function (goal, callback) {
+        this.goal = goal;
+        this.goalcallback = callback;
+
+        console.log("Dancer "+this.ID+" set goal to "+this.goal.x+" "+this.goal.y);
+    }
+
+    Dancer.prototype.seekGoal = function (delta) {
+        var x = this.graphics.x; var y = this.graphics.y;
+        
+        var dist_x = this.goal.x - x; var dist_y = this.goal.y - y;
+
+        var dist = Math.sqrt(Math.pow(dist_x, 2) + Math.pow(dist_y, 2));
+
+        if (dist < this.graphics.width/4) {
+            if (this.goalcallback) this.goalcallback();
+            this.goal = this.goalcallback = null;
+
+            return;
+        }
+
+        this.movevec.x = dist_x / dist; this.movevec.y = dist_y / dist;
+
+        this.move(delta);
+    }
+
+    Dancer.prototype.seekGroup = function (delta) {
+        var x = this.graphics.x; var y = this.graphics.y;
 
         var opinionmass = Math.max(this.opinion.reduce((a,b)=>a+b,0) +
             (this.throng.dancers.length - this.num_opinions)
@@ -117,7 +167,7 @@ define(['common/pixi.min'], function (PIXI) {
             if (i == this.ID) continue;
 
             var opinion;
-            if (this.opinion[i] && !this.throng.dancers[i].disengaged) {
+            if (this.opinion[i] && !this.throng.dancers[i].noseek) {
                 opinion = this.opinion[i];
             } else {
                 opinion = this.default_opinion;
@@ -130,15 +180,17 @@ define(['common/pixi.min'], function (PIXI) {
 
             var personalspacemvmt = 0;
 
-            if (dist < this.personalspace) {
+            if (this.throng.dancers[i].noavoid) {
+                personalspacemvmt = 0;
+            } else if (dist < this.personalspace) {
                 personalspacemvmt = - 2 * (this.personalspace/dist - 1);
             }
 
             this.movevec.x += (dist_x) * (opinion + personalspacemvmt) / (dist) / opinionmass;
             this.movevec.y += (dist_y) * (opinion + personalspacemvmt) / (dist) / opinionmass;
 
-            this.targetvec.x += (dist_x) * opinion / (dist*2) / opinionmass;
-            this.targetvec.y += (dist_y) * opinion / (dist*2) / opinionmass;
+            this.targetvec.x += (dist_x) * opinion / (dist) / opinionmass;
+            this.targetvec.y += (dist_y) * opinion / (dist) / opinionmass;
         }
 
         this.bounds.applyBounds(this.graphics, this.movevec);
@@ -148,12 +200,12 @@ define(['common/pixi.min'], function (PIXI) {
 
         if (movenorm < 0.04 * opinionmass) movenorm = 0.04 * opinionmass;
 
-        if (targetnorm > 0.04 * opinionmass || movenorm > 0.04 * opinionmass) {
+        if (targetnorm > 0.08 * opinionmass || movenorm > 0.04 * opinionmass) {
             this.movevec.x /= movenorm; this.movevec.y /= movenorm;
 
             this.move(delta);
         }
-    };
+    }; 
 
     Dancer.prototype.move = function (delta) {
         this.graphics.x += this.movevec.x * this.walkspeed * delta/1000;

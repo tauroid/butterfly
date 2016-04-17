@@ -2,11 +2,11 @@ let SessionLoad = 1
 if &cp | set nocp | endif
 let s:cpo_save=&cpo
 set cpo&vim
-inoremap <expr> <Down> pumvisible() ? "\" : "\<Down>"
-inoremap <expr> <S-Tab> pumvisible() ? "\" : "\<S-Tab>"
-inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
-imap <Nul> <C-Space>
 inoremap <C-Space> 
+imap <Nul> <C-Space>
+inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
+inoremap <expr> <S-Tab> pumvisible() ? "\" : "\<S-Tab>"
+inoremap <expr> <Down> pumvisible() ? "\" : "\<Down>"
 nnoremap \d :YcmShowDetailedDiagnostic
 vmap gx <Plug>NetrwBrowseXVis
 nmap gx <Plug>NetrwBrowseX
@@ -45,9 +45,10 @@ badd +1 main.js
 badd +1 butterfly.js
 badd +1 controller.js
 badd +7 dancer.js
-badd +0 game.js
-badd +0 throng.js
-badd +0 pixiwindow.js
+badd +1 game.js
+badd +1 throng.js
+badd +1 pixiwindow.js
+badd +0 bounds.js
 argglobal
 silent! argdel *
 argadd ../index.html
@@ -344,7 +345,7 @@ setlocal foldcolumn=0
 setlocal foldenable
 setlocal foldexpr=0
 setlocal foldignore=#
-setlocal foldlevel=1
+setlocal foldlevel=0
 setlocal foldmarker={{{,}}}
 set foldmethod=syntax
 setlocal foldmethod=syntax
@@ -413,41 +414,31 @@ setlocal wrap
 setlocal wrapmargin=0
 6
 normal! zo
-7
+72
 normal! zo
-39
+73
 normal! zo
-44
+75
+normal! zo
+76
 normal! zo
 85
 normal! zo
 86
 normal! zo
-95
-normal! zo
-97
-normal! zo
 98
 normal! zo
-99
+100
 normal! zo
-85
-normal! zc
-145
+101
 normal! zo
-146
+102
 normal! zo
-148
-normal! zo
-146
-normal! zc
-145
-normal! zc
-let s:l = 121 - ((74 * winheight(0) + 27) / 54)
+let s:l = 95 - ((89 * winheight(0) + 27) / 54)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-121
+95
 normal! 0
 tabedit controller.js
 set splitbelow splitright
@@ -571,16 +562,14 @@ setlocal wrap
 setlocal wrapmargin=0
 3
 normal! zo
-52
+50
 normal! zo
-56
-normal! zo
-let s:l = 52 - ((51 * winheight(0) + 26) / 53)
+let s:l = 3 - ((2 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-52
-normal! 0
+3
+normal! 06|
 wincmd w
 argglobal
 edit butterfly.js
@@ -692,17 +681,18 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-2
-normal! zo
 3
 normal! zo
-let s:l = 65 - ((41 * winheight(0) + 26) / 53)
+14
+normal! zo
+let s:l = 70 - ((28 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-65
-normal! 073|
+70
+normal! 061|
 wincmd w
+2wincmd w
 exe 'vert 1resize ' . ((&columns * 95 + 95) / 190)
 exe 'vert 2resize ' . ((&columns * 94 + 95) / 190)
 tabedit throng.js
@@ -829,13 +819,23 @@ setlocal wrapmargin=0
 normal! zo
 2
 normal! zo
-9
+12
 normal! zo
-let s:l = 13 - ((12 * winheight(0) + 26) / 53)
+19
+normal! zo
+21
+normal! zo
+33
+normal! zo
+44
+normal! zo
+45
+normal! zo
+let s:l = 12 - ((11 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-13
+12
 normal! 051|
 wincmd w
 argglobal
@@ -951,31 +951,328 @@ setlocal wrapmargin=0
 normal! zo
 2
 normal! zo
-18
+71
 normal! zo
-22
+84
 normal! zo
-28
+92
 normal! zo
-30
+98
 normal! zo
-22
+105
 normal! zo
-30
+108
 normal! zo
-32
+111
 normal! zo
-let s:l = 46 - ((29 * winheight(0) + 26) / 53)
+120
+normal! zo
+121
+normal! zo
+129
+normal! zo
+143
+normal! zo
+147
+normal! zo
+120
+normal! zo
+121
+normal! zo
+129
+normal! zo
+143
+normal! zo
+147
+normal! zo
+156
+normal! zo
+161
+normal! zo
+168
+normal! zo
+180
+normal! zo
+187
+normal! zo
+191
+normal! zo
+204
+normal! zo
+120
+normal! zo
+121
+normal! zo
+129
+normal! zo
+143
+normal! zo
+147
+normal! zo
+156
+normal! zo
+161
+normal! zo
+168
+normal! zo
+180
+normal! zo
+187
+normal! zo
+191
+normal! zo
+204
+normal! zo
+120
+normal! zo
+124
+normal! zo
+133
+normal! zo
+138
+normal! zo
+145
+normal! zo
+157
+normal! zo
+164
+normal! zo
+168
+normal! zo
+181
+normal! zo
+201
+normal! zo
+208
+normal! zo
+124
+normal! zo
+133
+normal! zo
+138
+normal! zo
+145
+normal! zo
+157
+normal! zo
+164
+normal! zo
+168
+normal! zo
+181
+normal! zo
+201
+normal! zo
+208
+normal! zo
+133
+normal! zo
+140
+normal! zo
+147
+normal! zo
+159
+normal! zo
+166
+normal! zo
+170
+normal! zo
+183
+normal! zo
+203
+normal! zo
+210
+normal! zo
+let s:l = 43 - ((33 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-46
-normal! 012|
+43
+normal! 031|
 wincmd w
-2wincmd w
 exe 'vert 1resize ' . ((&columns * 95 + 95) / 190)
 exe 'vert 2resize ' . ((&columns * 94 + 95) / 190)
-tabnext 4
+tabedit bounds.js
+set splitbelow splitright
+set nosplitbelow
+set nosplitright
+wincmd t
+set winheight=1 winwidth=1
+argglobal
+setlocal keymap=
+setlocal noarabic
+setlocal noautoindent
+setlocal backupcopy=
+setlocal nobinary
+setlocal nobreakindent
+setlocal breakindentopt=
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal cindent
+setlocal cinkeys=0{,0},0),:,!^F,o,O,e,0]
+setlocal cinoptions=j1,J1
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=sO:*\ -,mO:*\ \ ,exO:*/,s1:/*,mb:*,ex:*/,://
+setlocal commentstring=//%s
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=youcompleteme#Complete
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'javascript'
+setlocal filetype=javascript
+endif
+setlocal fixendofline
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=1
+setlocal foldmarker={{{,}}}
+set foldmethod=syntax
+setlocal foldmethod=syntax
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=croql
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=0
+setlocal imsearch=0
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255,$
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal lispwords=
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=bin,octal,hex
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=tern#Complete
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=4
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=%!airline#statusline(1)
+setlocal suffixesadd=
+setlocal swapfile
+setlocal synmaxcol=3000
+if &syntax != 'javascript'
+setlocal syntax=javascript
+endif
+setlocal tabstop=4
+setlocal tagcase=
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal undolevels=-123456
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+1
+normal! zo
+8
+normal! zo
+14
+normal! zo
+15
+normal! zo
+18
+normal! zo
+20
+normal! zo
+24
+normal! zo
+30
+normal! zo
+34
+normal! zo
+42
+normal! zo
+43
+normal! zo
+46
+normal! zo
+48
+normal! zo
+54
+normal! zo
+59
+normal! zo
+65
+normal! zo
+14
+normal! zo
+15
+normal! zo
+18
+normal! zo
+20
+normal! zo
+24
+normal! zo
+30
+normal! zo
+34
+normal! zo
+42
+normal! zo
+43
+normal! zo
+46
+normal! zo
+48
+normal! zo
+54
+normal! zo
+59
+normal! zo
+65
+normal! zo
+let s:l = 59 - ((49 * winheight(0) + 27) / 54)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+59
+normal! 075|
+tabnext 3
 set stal=1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf

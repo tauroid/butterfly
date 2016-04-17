@@ -42,10 +42,18 @@ define(['common/pixi.min', 'controller', 'pixiwindow',
 
         this.bounds = new Bounds();
 
-        this.bounds.addWall(0, true, true, false)
-                   .addWall(0, false, true, false)
-                   .addWall(floorside, true, true, true)
-                   .addWall(floorside, false, true, true);
+        this.bounds.addWall({ position: 0, vertical: true, solid: true, greater: false })
+                   .addWall({ position: 0, vertical: false, solid: true, greater: false })
+                   .addWall({ position: floorside, vertical: true, solid: true, greater: true, extents: [0, 4*floorside/5] })
+                   .addWall({ position: floorside, vertical: true, solid: true, greater: true, extents: [9*floorside/10, floorside] })
+                   .addWall({ position: floorside, vertical: false, solid: true, greater: true, extents: [0, floorside/10] })
+                   .addWall({ position: floorside, vertical: false, solid: true, greater: true, extents: [floorside/5, floorside] })
+                   .addWall({ position: 4*floorside/5, vertical: false, extents: [floorside, floorside*(1+1.5/8)] })
+                   .addWall({ position: 9*floorside/10, vertical: false, extents: [floorside, floorside*(1+1.5/8)] })
+                   .addWall({ position: floorside*(1+1.5/8), vertical: true })
+                   .addWall({ position: floorside/10, vertical: true, extents: [floorside, floorside*(1+1.5/8)] })
+                   .addWall({ position: floorside/5, vertical: true, extents: [floorside, floorside*(1+1.5/8)] })
+                   .addWall({ position: floorside*(1+1.5/8), vertical: false });
 
         var cross = new PIXI.Graphics();
 
@@ -57,7 +65,12 @@ define(['common/pixi.min', 'controller', 'pixiwindow',
 
         this.container.addChild(cross);
 
-        this.throng = new Throng(g, this.group, this.floor, this.bounds);
+        this.toilets = [
+            new PIXI.Point((1+1/8)*floorside, 17*floorside/20),
+            new PIXI.Point(3*floorside/20, (1+1/8)*floorside)
+        ];
+
+        this.throng = new Throng(g, this.group, this.floor, this.bounds, this.toilets);
         this.container.addChild(this.floor);
 
         this.throng.createClique(6, new PIXI.Point(floorside/2, floorside/2), 0xFF0000);
