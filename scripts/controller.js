@@ -6,6 +6,16 @@ define(function () {
                          "mousemove", "keydown", "keyup"];
         this.transmitChannel = "action";
         this.messagebus = new MessageBus();
+
+        this.blocked = false;
+    };
+
+    Controller.prototype.block = function () {
+        this.blocked = true;
+    };
+
+    Controller.prototype.unblock = function () {
+        this.blocked = false;
     };
 
     Controller.prototype.attach = function (game) {
@@ -16,7 +26,13 @@ define(function () {
         }
     };
 
+    Controller.prototype.detach = function (game) {
+        game.messagebus.unsubscribe(this);
+    };
+
     Controller.prototype.receiveMessage = function (channel, message) {
+        if (this.blocked) return;
+
         var process = this [ "process" + channel[0].toUpperCase() +
                              channel.substr(1)].bind(this);
 
@@ -50,7 +66,7 @@ define(function () {
     Controller.prototype.processKeydown = function (keyevent) {
         var cmd = this.mapKey(keyevent.key);
 
-        if (["up", "down", "left", "right", "shift"].indexOf(cmd) != -1) {
+        if (["up", "down", "left", "right", "shift", "talk"].indexOf(cmd) != -1) {
             this.messagebus.sendMessage("control", { control: cmd, active: true });
         }
     };
@@ -58,7 +74,7 @@ define(function () {
     Controller.prototype.processKeyup = function (keyevent) {
         var cmd = this.mapKey(keyevent.key);
 
-        if (["up", "down", "left", "right", "shift"].indexOf(cmd) != -1) {
+        if (["up", "down", "left", "right", "shift", "talk"].indexOf(cmd) != -1) {
             this.messagebus.sendMessage("control", { control: cmd, active: false });
         }
     };
@@ -90,6 +106,9 @@ define(function () {
             case "Shift":
                 cmd = "shift";
                 break;
+            case " ":
+                cmd = "talk";
+                break
         }
 
         return cmd;

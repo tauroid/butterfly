@@ -11,7 +11,7 @@ define(function () {
         return this;
     };
 
-    Bounds.prototype.applyHardBounds = function (position) {
+    Bounds.prototype.applyHardBounds = function (position, width, height) {
         for (var i = 0; i < this.walls.length; ++i) {
             var wall = this.walls[i];
 
@@ -22,8 +22,8 @@ define(function () {
                 }
 
                 if (wall.solid) {
-                    if (wall.greater && position.x > wall.position) position.x = wall.position;
-                    else if (!wall.greater && position.x < wall.position) position.x = wall.position;
+                    if (wall.greater && position.x + width/2 > wall.position) position.x = wall.position - width/2;
+                    else if (!wall.greater && position.x - width/2 < wall.position) position.x = wall.position + width/2;
                 }
             } else {
                 if (wall.extents && (position.x > Math.max.apply(null, wall.extents)
@@ -32,8 +32,8 @@ define(function () {
                 }
 
                 if (wall.solid) {
-                    if (wall.greater && position.y > wall.position) position.y = wall.position;
-                    else if (!wall.greater && position.y < wall.position) position.y = wall.position;
+                    if (wall.greater && position.y + height/2 > wall.position) position.y = wall.position - height/2;
+                    else if (!wall.greater && position.y - height/2 < wall.position) position.y = wall.position + height/2;
                 }
             }
         }

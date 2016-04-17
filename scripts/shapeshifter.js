@@ -1,8 +1,6 @@
 define(['common/pixi.min', 'dancer'], function (PIXI, Dancer) {
-    Shapeshifter = function (image, floor, throng, bounds, controller) {
-        Dancer.apply(this, [image, throng, bounds, 0xAAAAAA]);
-
-        this.floor = floor;
+    Shapeshifter = function (game, image, club, throng, controller) {
+        Dancer.apply(this, [game, image, throng, club, 0xAAAAAA]);
 
         this.shiftindicator = new PIXI.Graphics();
 
@@ -15,7 +13,7 @@ define(['common/pixi.min', 'dancer'], function (PIXI, Dancer) {
         
         this.shiftindicator.visible = false;
 
-        this.floor.addChild(this.shiftindicator);
+        this.club.floorcontainer.addChild(this.shiftindicator);
 
         this.controls = {
             up: false,
@@ -30,6 +28,23 @@ define(['common/pixi.min', 'dancer'], function (PIXI, Dancer) {
         this.mouseposition = new PIXI.Point();
 
         this.currentselection = null;
+
+        this.backupopinions = [];
+
+        this.talkClique = null;
+        this.startedTalking = null;
+        this.talkBar = new PIXI.Graphics();
+
+        this.impersonating = null;
+        this.hasSpottedMe = [];
+
+        this.talkBar.beginFill(0xFF00FF, 1)
+                    .drawRect(0, -2/16*(this.sprite.height), this.sprite.width, this.sprite.height/16)
+                    .endFill();
+
+        this.talkBar.visible = false;
+
+        this.graphics.addChild(this.talkBar);
 
         controller.messagebus.registerOnChannel("control", this);
         controller.messagebus.registerOnChannel("mouseposition", this);
@@ -47,6 +62,11 @@ define(['common/pixi.min', 'dancer'], function (PIXI, Dancer) {
 
     Shapeshifter.prototype.updateControl = function (cmd) {
         this.controls[cmd.control] = cmd.active;
+
+        if (cmd.control == "talk") {
+            if (cmd.active) this.talk();
+            else this.stopTalking();
+        }
     };
 
     Shapeshifter.prototype.updateMouse = function (position) {
@@ -64,12 +84,61 @@ define(['common/pixi.min', 'dancer'], function (PIXI, Dancer) {
 
         var dancer = this.throng.dancers[ID];
 
+        this.impersonating = ID;
+        this.clique = dancer.clique;
+
+        this.label.text = this.ID.toString()+"/"+this.impersonating.toString();
+
         this.border.clear()
                    .beginFill(dancer.colour, 1)
                    .drawRect(-this.sprite.width/16, -this.sprite.height/16,
                              this.sprite.width*(17/16), this.sprite.height*(17/16))
                    .endFill();
 
+        return this;
+    };
+
+    Shapeshifter.prototype.talk = function () {
+        if (this.talkClique != null) return;
+
+        var nearest = this.throng.findNearest(this.ID);
+
+        console.log("start talk");
+
+        this.talkClique = this.throng.cliques[this.throng.dancers[nearest].clique];
+        this.startedTalking = this.game.getTime();
+
+        this.talkBar.visible = true;
+
+        for (var i = 0; i < this.talkClique.length; ++i) {
+            this.throng.dancers[this.talkClique[i]].listen(this.ID);
+        }
+    };
+
+    Shapeshifter.prototype.stopTalking = function () {
+        if (this.talkClique == null) return;
+
+        console.log("stop talk");
+
+        for (var i = 0; i < this.talkClique.length; ++i) {
+            this.throng.dancers[this.talkClique[i]].stopListening();
+        }
+
+        this.talkClique = null;
+        this.startedTalking = null;
+
+        this.talkBar.visible = false;
+    };
+
+    Shapeshifter.prototype.updateTalkBar = function (time) {
+        this.talkBar.scale.x = (time - this.startedTalking) / 15000;
+    };
+
+    Shapeshifter.prototype.detectSpotted = function () {
+        if (this.impersonating != null && this.throng.hasLineOfSight(this.ID, this.impersonating)) {
+            this.throng.dancers[this.impersonating].spotImpersonator(this.ID);
+            this.hasSpottedMe.push(this.impersonating);
+        }
     };
 
     Shapeshifter.prototype.update = function (delta, time) {
@@ -80,7 +149,9 @@ define(['common/pixi.min', 'dancer'], function (PIXI, Dancer) {
         if (this.controls.down) this.movevec.y += 1;
         if (this.controls.left) this.movevec.x -= 1;
         if (this.controls.right) this.movevec.x += 1;
-        
+
+        if (this.startedTalking) this.updateTalkBar(time);
+
         var norm = Math.sqrt(Math.pow(this.movevec.x, 2) + Math.pow(this.movevec.y, 2));
 
         if (norm > 0) {
@@ -90,7 +161,9 @@ define(['common/pixi.min', 'dancer'], function (PIXI, Dancer) {
             this.graphics.y += this.movevec.y * this.walkspeed * delta/1000;
         }
 
-        this.bounds.applyHardBounds(this.graphics);
+        this.club.bounds.applyHardBounds(this.graphics, this.sprite.width, this.sprite.height);
+
+        if (this.hasSpottedMe.indexOf(this.impersonating) == -1) this.detectSpotted();
 
         var clearselection = false;
 

@@ -97,7 +97,7 @@ define(['assets','messagebus','movements'],
 
         for (var i = 0; i < this.groupnames.length; ++i) {
             var logicgroup = this.logicgroups[this.groupnames[i]];
-            if (logicgroup !== undefined) {
+            if (logicgroup !== undefined && !logicgroup.paused) {
                 for (var l = 0; l < logicgroup.length; ++l) {
                     if (logicgroup[l].finished) {
                         logicgroup.splice(l,1);
@@ -112,6 +112,10 @@ define(['assets','messagebus','movements'],
         setTimeout(this.update.bind(this), this.updateTimestep);
     };
 
+    Game.prototype.getTime = function () {
+        return (new Date()).getTime() - this.startTime;
+    };
+
     Game.prototype.load = function (config) {
         this.configs[config.name] = config;
         config.load();
@@ -120,6 +124,22 @@ define(['assets','messagebus','movements'],
     Game.prototype.unload = function (name) {
         this.configs[name].unload();
         delete this.configs[name];
+    };
+
+    Game.prototype.pauseLogic = function (name) {
+        var logicgroup = this.logicgroups[name];
+
+        if (logicgroup != undefined) {
+            logicgroup.paused = true;
+        }
+    };
+
+    Game.prototype.resumeLogic = function (name) {
+        var logicgroup = this.logicgroups[name];
+
+        if (logicgroup != undefined) {
+            logicgroup.paused = false;
+        }
     };
 
     Game.prototype.activateGroup = function (name) {
