@@ -64,7 +64,13 @@ define(function () {
     };
 
     Controller.prototype.processKeydown = function (keyevent) {
-        var cmd = this.mapKey(keyevent.key);
+        var cmd;
+
+        if (keyevent.key) {
+            cmd = this.mapKey(keyevent.key);
+        } else if (keyevent.code) {
+            cmd = this.mapKey(keyevent.code);
+        }
 
         if (["up", "down", "left", "right", "shift", "talk"].indexOf(cmd) != -1) {
             this.messagebus.sendMessage("control", { control: cmd, active: true });
@@ -72,7 +78,13 @@ define(function () {
     };
 
     Controller.prototype.processKeyup = function (keyevent) {
-        var cmd = this.mapKey(keyevent.key);
+        var cmd;
+
+        if (keyevent.key) {
+            cmd = this.mapKey(keyevent.key);
+        } else if (keyevent.code) {
+            cmd = this.mapKey(keyevent.code);
+        }
 
         if (["up", "down", "left", "right", "shift", "talk"].indexOf(cmd) != -1) {
             this.messagebus.sendMessage("control", { control: cmd, active: false });
@@ -84,28 +96,35 @@ define(function () {
 
         switch (key) {
             case "ArrowUp":
+            case "KeyW":
             case "w":
             case "W":
                 cmd = "up";
                 break;
             case "ArrowDown":
+            case "KeyS":
             case "s":
             case "S":
                 cmd = "down";
                 break;
             case "ArrowLeft":
+            case "KeyA":
             case "a":
             case "A":
                 cmd = "left";
                 break;
             case "ArrowRight":
+            case "KeyD":
             case "d":
             case "D":
                 cmd = "right";
                 break;
             case "Shift":
+            case "ShiftLeft":
+            case "ShiftRight":
                 cmd = "shift";
                 break;
+            case "Space":
             case " ":
                 cmd = "talk";
                 break
