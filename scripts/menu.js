@@ -27,15 +27,14 @@ define(function () {
     };
 
     Menu.prototype.processClick = function (position) {
+        console.log("isclick");
         for (var i = 0; i < this.entries.length; ++i) {
             var entry = this.entries[i];
             var wt = entry.thing.worldTransform;
 
             var mappedpoint = wt.applyInverse(position);
 
-            if (entry.rect.contains(mappedpoint.x, mappedpoint.y)) {
-                entry.callback();
-            }
+            if (entry.rect.contains(mappedpoint.x, mappedpoint.y)) entry.callback();
         }
     };
 
@@ -49,7 +48,9 @@ define(function () {
             if (entry.rect.contains(mappedpoint.x, mappedpoint.y)) {
                 if (!entry.mousedover) {
                     entry.mousedover = true;
-                    if (entry.mouseovercallback) entry.mouseovercallback();
+                    if (entry.mouseovercallback) {
+                        entry.mouseovercallback();
+                    }
                 }
             } else if (entry.mousedover) {
                 entry.mousedover = false;

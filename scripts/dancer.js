@@ -1,8 +1,77 @@
 define(['common/pixi.min'], function (PIXI) {
-    Dancer = function (game, image, throng, club, colour) {
+    Dancer = function (game, throng, club, colour) {
         this.game = game;
+        var g = game;
         this.graphics = new PIXI.Container();
-        this.sprite = new PIXI.Sprite(image);
+
+        var chooseperson = Math.floor(3*Math.random());
+        var personimg, personimg_walk;
+
+        if (chooseperson < 2) {
+            personimg = game.assets.images.person1.baseTexture;
+            personimg_walk = game.assets.images.person1_walk.baseTexture;
+        } else {
+            personimg = game.assets.images.person2.baseTexture;
+            personimg_walk = game.assets.images.person2_walk.baseTexture;
+        }
+
+        var f_frame = new PIXI.Rectangle(0, 0, 11, 19);
+        var b_frame = new PIXI.Rectangle(11, 0, 11, 19);
+
+        this.f_tex = new PIXI.Texture(personimg, f_frame);
+        this.b_tex = new PIXI.Texture(personimg, b_frame);
+        this.walk_f_tex = new PIXI.Texture(personimg_walk, f_frame);
+        this.walk_b_tex = new PIXI.Texture(personimg_walk, b_frame);
+
+        this.sprite = new PIXI.Sprite(this.b_tex);
+
+        this.spritecontainer = new PIXI.Container();
+        this.spritecontainer.addChild(this.sprite);
+
+        this.spritecontainer.pivot.x = this.sprite.width/2;
+        this.spritecontainer.pivot.y = 2*this.sprite.height/3;
+
+        this.spritecontainer.x = this.sprite.width/2;
+        this.spritecontainer.y = this.sprite.height/2;
+
+        this.clothescontainer = new PIXI.Container();
+        this.spritecontainer.addChild(this.clothescontainer);
+
+        var choosetop = Math.floor(4*Math.random());
+
+        var top_f_frame = new PIXI.Rectangle(0, choosetop*19, 11, 19);
+        var top_b_frame = new PIXI.Rectangle(11, choosetop*19, 11, 19);
+
+        this.top_f_tex = new PIXI.Texture(g.assets.images.tops.baseTexture, top_f_frame);
+        this.top_b_tex = new PIXI.Texture(g.assets.images.tops.baseTexture, top_b_frame);
+
+        this.top_sprite = new PIXI.Sprite(this.top_b_tex);
+
+        this.clothescontainer.addChild(this.top_sprite);
+
+        var choosehat = Math.floor(4*Math.random());
+
+        var hat_f_frame = new PIXI.Rectangle(0, choosehat*19, 11, 19);
+        var hat_b_frame = new PIXI.Rectangle(11, choosehat*19, 11, 19);
+
+        this.hat_f_tex = new PIXI.Texture(g.assets.images.hats.baseTexture, hat_f_frame);
+        this.hat_b_tex = new PIXI.Texture(g.assets.images.hats.baseTexture, hat_b_frame);
+
+        this.hat_sprite = new PIXI.Sprite(this.hat_b_tex);
+
+        this.clothescontainer.addChild(this.hat_sprite);
+
+        var chooseleg = Math.floor(4*Math.random());
+
+        var leg_f_frame = new PIXI.Rectangle(0, chooseleg*19, 11, 19);
+        var leg_b_frame = new PIXI.Rectangle(11, chooseleg*19, 11, 19);
+
+        this.leg_f_tex = new PIXI.Texture(g.assets.images.legs.baseTexture, leg_f_frame);
+        this.leg_b_tex = new PIXI.Texture(g.assets.images.legs.baseTexture, leg_b_frame);
+
+        this.leg_sprite = new PIXI.Sprite(this.leg_b_tex);
+
+        this.clothescontainer.addChild(this.leg_sprite);
 
         this.colour = colour;
         this.border = new PIXI.Graphics();
@@ -12,15 +81,15 @@ define(['common/pixi.min'], function (PIXI) {
                              this.sprite.width*(17/16), this.sprite.height*(17/16))
                    .endFill();
 
-        this.label = new PIXI.Text("");
-        this.label.scale.x = this.label.scale.y = 1/4;
+        this.label = new PIXI.Text("", { fill: '#FFFFFF' });
+        this.label.scale.x = this.label.scale.y = 1/8;
         this.label.position.y = -this.sprite.height/4;
         
-        this.graphics.addChild(this.border);
-        this.graphics.addChild(this.sprite);
-        this.graphics.addChild(this.label);
+        //this.graphics.addChild(this.border);
+        this.graphics.addChild(this.spritecontainer);
+        //this.graphics.addChild(this.label);
 
-        this.graphics.pivot = new PIXI.Point(this.sprite.width/2, this.sprite.height/2);
+        this.graphics.pivot = new PIXI.Point(this.sprite.width/2, 2*this.sprite.height/3);
 
         this.throng = throng;
         this.club = club;
@@ -63,6 +132,9 @@ define(['common/pixi.min'], function (PIXI) {
         this.returnpoint = null;
 
         this.lookingOut = true;
+
+        this.laststep = game.getTime();
+        this.stepdelay = 200;
     };
 
     Dancer.prototype.setID = function (ID) {
@@ -292,8 +364,50 @@ define(['common/pixi.min'], function (PIXI) {
     }; 
 
     Dancer.prototype.move = function (delta) {
-        this.graphics.x += this.movevec.x * this.walkspeed * delta/1000;
-        this.graphics.y += this.movevec.y * this.walkspeed * delta/1000;
+        var move_x = this.movevec.x * this.walkspeed;
+        var move_y = this.movevec.y * this.walkspeed;
+
+        this.graphics.x += move_x * delta/1000;
+        this.graphics.y += move_y * delta/1000;
+
+        var speed = Math.sqrt(Math.pow(move_x, 2) + Math.pow(move_y, 2));
+
+        var time = this.game.getTime();
+        if (speed > 2) {
+            if (time - this.laststep > this.stepdelay) {
+                this.laststep = time;
+
+                this.spritecontainer.scale.x *= -1;
+            }
+
+            if (this.movevec.y < 0 && this.sprite.texture != this.walk_b_tex) {
+                this.sprite.texture = this.walk_b_tex;
+                this.hat_sprite.texture = this.hat_b_tex;
+                this.top_sprite.texture = this.top_b_tex;
+                this.leg_sprite.texture = this.leg_b_tex;
+                this.clothescontainer.y = -1;
+            } else if (this.movevec.y > 0 && this.sprite.texture != this.walk_f_tex) {
+                this.sprite.texture = this.walk_f_tex;
+                this.hat_sprite.texture = this.hat_f_tex;
+                this.top_sprite.texture = this.top_f_tex;
+                this.leg_sprite.texture = this.leg_f_tex;
+                this.clothescontainer.y = -1;
+            }
+        } else {
+            if (this.sprite.texture == this.walk_f_tex) {
+                this.sprite.texture = this.f_tex;
+                this.hat_sprite.texture = this.hat_f_tex;
+                this.top_sprite.texture = this.top_f_tex;
+                this.leg_sprite.texture = this.leg_f_tex;
+                this.clothescontainer.y = 0;
+            } else if (this.sprite.texture == this.walk_b_tex) {
+                this.sprite.texture = this.b_tex;
+                this.hat_sprite.texture = this.hat_b_tex;
+                this.top_sprite.texture = this.top_b_tex;
+                this.leg_sprite.texture = this.leg_b_tex;
+                this.clothescontainer.y = 0;
+            }
+        }
     };
 
     return Dancer;

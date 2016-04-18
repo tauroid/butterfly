@@ -1,9 +1,10 @@
 define(function () {
-    ClubClock = function (game, starttime, endtime, callback) {
+    ClubClock = function (game, starttime, endtime, callback, club) {
         this.gamestarttime = game.getTime();
         this.starttime = starttime;
         this.endtime = endtime;
         this.callback = callback;
+        this.club = club;
 
         this.microsecondsperminute = 1000;
 
@@ -26,6 +27,16 @@ define(function () {
             this.callback();
             this.done = true;
             clocktime = this.endtime;
+            this.club.finish();
+        }
+
+        if (clocktime > this.endtime - 11) {
+            this.display.x = 8*Math.random() - 4;
+            this.display.y = 8*Math.random() - 4;
+        } else if (clocktime > this.endtime - 31) {
+            if (this.display.style.fill != "#FF0000") this.display.style.fill = "#FF0000";
+        } else if (clocktime > this.endtime - 61) {
+            if (this.display.style.fill != "#FFBB00") this.display.style.fill = "#FFBB00";
         }
 
         var hours = (Math.floor(clocktime/60) % 24).toString();

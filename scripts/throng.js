@@ -18,7 +18,7 @@ define(function () {
         var startID = this.dancers.length;
 
         for (var i = 0; i < number; ++i) {
-            var dancer = new Dancer(g, g.assets.images.place, this, this.club, colour);
+            var dancer = new Dancer(g, this, this.club, colour);
 
             for (var j = 0; j < number; ++j) {
                 if (j == i) continue;

@@ -1,6 +1,6 @@
 define(['common/pixi.min', 'dancer'], function (PIXI, Dancer) {
     Shapeshifter = function (game, image, club, throng, controller) {
-        Dancer.apply(this, [game, image, throng, club, 0xAAAAAA]);
+        Dancer.apply(this, [game, throng, club, 0xAAAAAA]);
 
         this.shiftindicator = new PIXI.Graphics();
 
@@ -86,6 +86,17 @@ define(['common/pixi.min', 'dancer'], function (PIXI, Dancer) {
 
         this.impersonating = ID;
         this.clique = dancer.clique;
+
+        this.walk_f_tex = dancer.walk_f_tex;
+        this.walk_b_tex = dancer.walk_b_tex;
+        this.f_tex = dancer.f_tex;
+        this.b_tex = dancer.b_tex;
+        this.hat_f_tex = dancer.hat_f_tex;
+        this.hat_b_tex = dancer.hat_b_tex;
+        this.top_f_tex = dancer.top_f_tex;
+        this.top_b_tex = dancer.top_b_tex;
+        this.leg_f_tex = dancer.leg_f_tex;
+        this.leg_b_tex = dancer.leg_b_tex;
 
         this.label.text = this.ID.toString()+"/"+this.impersonating.toString();
 
@@ -189,6 +200,61 @@ define(['common/pixi.min', 'dancer'], function (PIXI, Dancer) {
             this.shiftindicator.visible = false;
             this.currentselection = null;
         }
+
+        var move_x = this.movevec.x * this.walkspeed;
+        var move_y = this.movevec.y * this.walkspeed;
+
+        var speed = Math.sqrt(Math.pow(move_x, 2) + Math.pow(move_y, 2));
+
+        var time = this.game.getTime();
+        if (speed > 2) {
+            if (time - this.laststep > this.stepdelay) {
+                this.laststep = time;
+
+                this.spritecontainer.scale.x *= -1;
+            }
+
+            if (this.movevec.y < 0 && this.sprite.texture != this.walk_b_tex) {
+                this.sprite.texture = this.walk_b_tex;
+                this.hat_sprite.texture = this.hat_b_tex;
+                this.top_sprite.texture = this.top_b_tex;
+                this.leg_sprite.texture = this.leg_b_tex;
+                this.clothescontainer.y = -1;
+            } else if (this.movevec.y > 0 && this.sprite.texture != this.walk_f_tex) {
+                this.sprite.texture = this.walk_f_tex;
+                this.hat_sprite.texture = this.hat_f_tex;
+                this.top_sprite.texture = this.top_f_tex;
+                this.leg_sprite.texture = this.leg_f_tex;
+                this.clothescontainer.y = -1;
+            } else if (this.sprite.texture == this.b_tex) {
+                this.sprite.texture = this.walk_b_tex;
+                this.hat_sprite.texture = this.hat_b_tex;
+                this.top_sprite.texture = this.top_b_tex;
+                this.leg_sprite.texture = this.leg_b_tex;
+                this.clothescontainer.y = -1;
+            } else if (this.sprite.texture == this.f_tex) {
+                this.sprite.texture = this.walk_f_tex;
+                this.hat_sprite.texture = this.hat_f_tex;
+                this.top_sprite.texture = this.top_f_tex;
+                this.leg_sprite.texture = this.leg_f_tex;
+                this.clothescontainer.y = -1;
+            }
+        } else {
+            if (this.sprite.texture == this.walk_f_tex) {
+                this.sprite.texture = this.f_tex;
+                this.hat_sprite.texture = this.hat_f_tex;
+                this.top_sprite.texture = this.top_f_tex;
+                this.leg_sprite.texture = this.leg_f_tex;
+                this.clothescontainer.y = 0;
+            } else if (this.sprite.texture == this.walk_b_tex) {
+                this.sprite.texture = this.b_tex;
+                this.hat_sprite.texture = this.hat_b_tex;
+                this.top_sprite.texture = this.top_b_tex;
+                this.leg_sprite.texture = this.leg_b_tex;
+                this.clothescontainer.y = 0;
+            }
+        }
+ 
     };
 
     return Shapeshifter;

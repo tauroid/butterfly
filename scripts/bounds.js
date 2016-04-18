@@ -32,8 +32,8 @@ define(function () {
                 }
 
                 if (wall.solid) {
-                    if (wall.greater && position.y + height/2 > wall.position) position.y = wall.position - height/2;
-                    else if (!wall.greater && position.y - height/2 < wall.position) position.y = wall.position + height/2;
+                    if (wall.greater && position.y + width/2 > wall.position) position.y = wall.position - width/2;
+                    else if (!wall.greater && position.y - width/2 < wall.position) position.y = wall.position + width/2;
                 }
             }
         }

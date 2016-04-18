@@ -1,5 +1,5 @@
-define(['dancer', 'throng', 'shapeshifter', 'bounds', 'clubclock', 'overlay', 'menu'],
-        function (Dancer, Throng, Shapeshifter, Bounds, ClubClock, Overlay, Menu) {
+define(['dancer', 'throng', 'shapeshifter', 'bounds', 'clubclock', 'overlay', 'finishoverlay', 'menu'],
+        function (Dancer, Throng, Shapeshifter, Bounds, ClubClock, Overlay, FinishOverlay, Menu) {
     Club1 = function (game, butterfly) {
         this.game = game;
         this.butterfly = butterfly;
@@ -36,16 +36,12 @@ define(['dancer', 'throng', 'shapeshifter', 'bounds', 'clubclock', 'overlay', 'm
         this.floorcontainer.pivot.x = floorside / 2;
         this.floorcontainer.pivot.y = floorside / 2;
 
-        this.floorbackfill = new PIXI.Graphics();
-        var floorbackfill = this.floorbackfill;
+        this.floorbackground = new PIXI.Sprite(g.assets.images.clubfloor);
+        var floorbackground = this.floorbackground;
 
-        floorbackfill.beginFill(0x00FF00, 1)
-                     .drawRect(0, 0, floorside, floorside)
-                     .endFill();
+        this.floorcontainer.addChild(floorbackground);
 
-        this.floorcontainer.addChild(floorbackfill);
-
-        this.clubclock = new ClubClock(g, 1380, 1560, function () {});
+        this.clubclock = new ClubClock(g, 1380, 1500, function () {}, this);
         this.floorcontainer.addChild(this.clubclock.graphics);
         this.clubclock.graphics.scale.x = 1/this.floorcontainer.scale.x;
         this.clubclock.graphics.scale.y = 1/this.floorcontainer.scale.y;
@@ -74,6 +70,16 @@ define(['dancer', 'throng', 'shapeshifter', 'bounds', 'clubclock', 'overlay', 'm
             new PIXI.Point(3*floorside/20, (1+1/8)*floorside)
         ];
 
+        for (var i = 0; i < this.toilets.length; ++i) {
+            var toilettext = new PIXI.Text("TOILET", { font: "20px EightBitOperator", fill: '#0000DD' });
+            toilettext.x = this.toilets[i].x;
+            toilettext.y = this.toilets[i].y - 8;
+            toilettext.scale.x = 1/4;
+            toilettext.scale.y = 1/4;
+
+            this.floorcontainer.addChild(toilettext);
+        }
+
         this.exit = new PIXI.Point(floorside/2, (1+1/8)*floorside);
 
         this.throng = new Throng(g, this.group, this);
@@ -83,7 +89,7 @@ define(['dancer', 'throng', 'shapeshifter', 'bounds', 'clubclock', 'overlay', 'm
         this.throng.createClique(6, new PIXI.Point(floorside/2, floorside*4/7), 0x0000FF);
         this.throng.createClique(6, new PIXI.Point(floorside/2, floorside*4/7), 0xFFFF00);
 
-        this.shapeshifter = new Shapeshifter(g, g.assets.images.place, this, this.throng, this.controller);
+        this.shapeshifter = new Shapeshifter(g, g.assets.images.ex, this, this.throng, this.controller);
         this.shapeshifter.graphics.x = this.shapeshifter.graphics.width/2;
         this.shapeshifter.graphics.y = floorside/7 + this.shapeshifter.graphics.height/2;
         this.throng.addDancer(this.shapeshifter);
@@ -110,8 +116,33 @@ define(['dancer', 'throng', 'shapeshifter', 'bounds', 'clubclock', 'overlay', 'm
 
         this.container.addChild(this.menuicon);
 
+        this.finishoverlay = new FinishOverlay(this.game, this, this.butterfly);
+        this.finishoverlay.load(Club1);
+        this.container.addChild(this.finishoverlay.container);
+
         g.createGroup(this.name, this.group);
         g.activateGroup(this.name);
+    };
+
+    Club1.prototype.finish = function () {
+        this.pause();
+        this.iconmenu.controller.block();
+        this.finishoverlay.show();
+        this.floorcontainer.visible = false;
+    };
+
+    Club1.prototype.calculateScore = function () {
+        var score = 0;
+
+        for (var i = 0; i < this.throng.dancers.length; ++i) {
+            var dancer = this.throng.dancers[i];
+
+            for (var j = 0; j < dancer.opinion.length; ++j) {
+                if (dancer.opinion[j] != undefined) score += dancer.opinion[j];
+            }
+        }
+
+        return score - 120;
     };
 
     Club1.prototype.unload = function () {
@@ -120,6 +151,7 @@ define(['dancer', 'throng', 'shapeshifter', 'bounds', 'clubclock', 'overlay', 'm
 
         this.overlay.unload();
         this.iconmenu.unload();
+        this.finishoverlay.unload();
     };
 
     Club1.prototype.pause = function () {
